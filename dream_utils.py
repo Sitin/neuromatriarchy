@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import scipy.ndimage as nd
 from google.protobuf import text_format
@@ -10,6 +12,7 @@ import caffe
 # caffe.set_device(0) # select GPU device if multiple devices exist
 
 from np_array_utils import *
+from img_utils import *
 
 
 # a couple of utility functions for converting to and from Caffe's input image layout
@@ -25,8 +28,8 @@ def objective_L2(dst):
     dst.diff[:] = dst.data
 
 
-def make_step(net, step_size=1.5, end=None, 
-                  jitter=32, clip=True, objective=objective_L2):
+def make_step(net, step_size=1.5, end=None,
+              jitter=32, clip=True, objective=objective_L2):
         '''Basic gradient ascent step.'''
         # default end layer is a global variable
         if end is None:
@@ -70,14 +73,20 @@ class Dreamer:
                                mean = np.float32([104.0, 116.0, 122.0]), # ImageNet mean, training set dependent
                                channel_swap = self.channel_swap) # the reference model has channels in BGR order instead of RGB
 
-    def deepdream(self, base_img, iter_n=10, octave_n=4, octave_scale=1.4, 
-                  end=None, clip=True, show_diff=False, save_as=None, **step_params):
+    def deepdream(self, base_img, iter_n=10, octave_n=4, octave_scale=1.4, resize_out=None,
+                  end=None, clip=True, show_diff=False, save_as=None, mask=None, show_results=True,
+                  **step_params):
         # default end layer is a class member
         if end is None:
             end = self.end
 
         # remember image dimensions
         o_h, o_w, _ = base_img.shape
+
+        # calculate sie for intermediate output
+        r_w, r_h = o_w, o_h
+        if resize_out is not None:
+            r_w, r_h = resize_out
         
         # prepare base images for all octaves
         octaves = [preprocess(self.net, base_img)]
@@ -103,11 +112,14 @@ class Dreamer:
                 vis = deprocess(self.net, src.data[0])
                 if not clip: # adjust image contrast if clipping is disabled
                     vis = vis*(255.0/np.percentile(vis, 99.98))
+                # resize for better preview
+                vis = resizearray(vis, r_w, r_h)
+                # apply mask if required
+                if mask:
+                    vis = apply_mask_to_img(vis, mask)
                 # save frame to file:
                 if save_as is not None:
-                    fromarray(vis).save('%s-%04d.jpg' % (save_as, frame_i))
-                # resize for better preview
-                vis = resizearray(vis, o_w, o_h)
+                    fromarray(vis).save('%s-%04d-%02d.jpg' % (save_as, frame_i, i))
                 # show onli difference if required
                 if show_diff:
                     vis = vis - base_img
@@ -115,10 +127,13 @@ class Dreamer:
                     if save_as is not None:
                         fromarray(vis).save('%s-%04d-diff.jpg' % (save_as, frame_i))
                 # show result of the stage
-                showarray(vis)
+                if show_results:
+                    showarray(vis)
                     
-                print octave, i, end, vis.shape
-                clear_output(wait=True)
+                # print frame statistics and clear output if necessary
+                print(octave, i, end, vis.shape)
+                if show_results:
+                    clear_output(wait=True)
                 
             # extract details produced on the current octave
             detail = src.data[0]-octave_base
@@ -131,7 +146,8 @@ class Dreamer:
 
     def long_dream(self, base_img, stages=[],
                    resize_in=None, resize_out=None,
-                   show_diff=False, save_as=None, **step_params):
+                   show_diff=False, save_as=None, mask=None,
+                   show_results=True, **step_params):
         if save_as is not None:
             fromarray(base_img).save('%s-00-base.jpg'%save_as)
         
@@ -150,6 +166,11 @@ class Dreamer:
                 r_w, r_h = resize_out
                 img=resizearray(img, r_w, r_h)
             
-            img=self.deepdream(img, end=stage, show_diff=show_diff, save_as=save_as, **step_params)
+            img = self.deepdream(img, end=stage, show_diff=show_diff, save_as=save_as, mask=mask,
+                                 resize_out=resize_out, show_results=show_results, **step_params)
             
+        # apply mask if required
+        if mask:
+            img = apply_mask_to_img(img, mask)
+
         return img
