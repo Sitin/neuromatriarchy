@@ -5,8 +5,6 @@ import os
 from glob import glob
 import datetime
 
-import numpy as np
-import PIL.Image
 from google.protobuf import text_format
 
 import caffe
@@ -21,6 +19,7 @@ from dream_utils import *
 from obsession_utils import *
 from img_utils import *
 from file_utils import *
+from settings import *
 
 
 # Original emotion recognition model
@@ -33,16 +32,12 @@ emotions = Dreamer(
 )
 
 
-louise_img = np.float32(PIL.Image.open('images/louise.jpg'))
-louise_crop_mask = PIL.Image.open('images/louise_crop_mask.png')
-
-
 # Define dream pipeline
-emotion_stages=['conv5', 'conv3', 'conv4']
-now = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S.%f")
+emotion_stages = ['conv5', 'conv3', 'conv4']
     
 while True:
-    emotions.long_dream(louise_img, stages=emotion_stages,
-                        resize_in=(224, 224), resize_out=(800, 800),
-                        mask=louise_crop_mask,
+    now = datetime.datetime.now().strftime(TIME_FORMAT)
+    emotions.long_dream(image, stages=emotion_stages,
+                        resize_in=resize_in, resize_out=resize_out,
+                        mask=image_mask,
                         save_as='emotions/data/frames/%s'%now, show_results=False)

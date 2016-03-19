@@ -147,7 +147,7 @@ class Dreamer:
     def long_dream(self, base_img, stages=[],
                    resize_in=None, resize_out=None,
                    show_diff=False, save_as=None, mask=None,
-                   show_results=True, **step_params):
+                   show_results=True, skip_stages=0, **step_params):
         if save_as is not None:
             fromarray(base_img).save('%s-00-base.jpg'%save_as)
         
@@ -161,12 +161,17 @@ class Dreamer:
             # append stage name
             if save_as is not None:
                 save_as += '-%02d-%s' % (s+1, stage)
+            # define name for iteration
+            save_stage_as = save_as
+            # skip stage saving if required
+            if s < skip_stages: 
+                save_stage_as = None
             # resize at last stage if required
             if s == len(stages) -1 and resize_out is not None:
                 r_w, r_h = resize_out
                 img=resizearray(img, r_w, r_h)
-            
-            img = self.deepdream(img, end=stage, show_diff=show_diff, save_as=save_as, mask=mask,
+
+            img = self.deepdream(img, end=stage, show_diff=show_diff, save_as=save_stage_as, mask=mask,
                                  resize_out=resize_out, show_results=show_results, **step_params)
             
         # apply mask if required

@@ -3,6 +3,7 @@ import java.util.List;
 
 
 PImage img;
+PImage background;
 File framesDir;
 File [] frames;
 File currentFrame;
@@ -11,11 +12,13 @@ File lastFrame;
 void setup() {
   //fullScreen();
   frameRate(12);
-  size(800, 800);  // size always goes first!
+  size(1024, 768);  // size always goes first!
   surface.setResizable(true);
   background(0);
   
   framesDir = new File(dataPath("frames"));
+  background = loadImage("background.jpg");
+  image(background, 0, 0);
 }
 
 void draw() {
@@ -34,7 +37,7 @@ void draw() {
     String frameName = nameParts[nameParts.length - 1];
     
     img = loadImage(framePath);
-    image(img, 0, 0);
+    image(img, width / 2 - 350, 0);
     
     fill(128, 128, 128);
     noStroke();
