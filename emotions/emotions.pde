@@ -39,9 +39,11 @@ void draw() {
     img = loadImage(framePath);
     image(img, width / 2 - 350, 0);
     
+    fill(0, 0, 0);
+    rect(0, height - 30, width, height);
     fill(128, 128, 128);
     noStroke();
-    text(frameName, 10, height - 50);
+    text(frameName, 10, height - 10);
     
     println(frameName);
   }
