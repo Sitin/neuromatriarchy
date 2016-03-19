@@ -35,11 +35,17 @@ emotions = Dreamer(
 
 
 # Define dream pipeline
-emotion_stages = ['conv5', 'conv2', 'conv3', 'conv4']
+emotion_stages = ['conv5', 'conv4', 'conv3', 'conv4']
+emotion_guides = [
+    np.float32(PIL.Image.open('images/pattern_club.jpg')),
+    np.float32(PIL.Image.open('images/pattern_flower.jpg')),
+    np.float32(PIL.Image.open('images/pattern_elephant.jpg')),
+    np.float32(PIL.Image.open('images/pattern_crowd.jpg'))
+]
     
 while True:
     now = datetime.datetime.now().strftime(TIME_FORMAT)
     emotions.long_dream(image, stages=emotion_stages,
                         resize_in=resize_in, resize_out=resize_out,
-                        mask=image_mask,
+                        mask=image_mask, guides=emotion_guides,
                         save_as='situations/data/frames/%s'%now, show_results=False)

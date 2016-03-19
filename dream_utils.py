@@ -13,6 +13,7 @@ import caffe
 
 from np_array_utils import *
 from img_utils import *
+from obsession_utils import *
 
 
 # a couple of utility functions for converting to and from Caffe's input image layout
@@ -147,7 +148,7 @@ class Dreamer:
     def long_dream(self, base_img, stages=[],
                    resize_in=None, resize_out=None,
                    show_diff=False, save_as=None, mask=None,
-                   show_results=True, skip_stages=0, **step_params):
+                   show_results=True, skip_stages=0, guides=[], **step_params):
         if save_as is not None:
             fromarray(base_img).save('%s-00-base.jpg'%save_as)
         
@@ -155,6 +156,7 @@ class Dreamer:
         if resize_in is not None:
             r_w, r_h = resize_in
             img=resizearray(img, r_w, r_h)
+
             
         for s in xrange(len(stages)):
             stage = stages[s]
@@ -171,8 +173,14 @@ class Dreamer:
                 r_w, r_h = resize_out
                 img=resizearray(img, r_w, r_h)
 
+            # inject obsession guide to dream
+            objective_guide = objective_L2
+            if len(guides) < s:
+                dst, guide_features = define_obsession(self.net, end=stage, guide=guides[s])
+                objective_guide = make_objective_guide(guide_features)
+            
             img = self.deepdream(img, end=stage, show_diff=show_diff, save_as=save_stage_as, mask=mask,
-                                 resize_out=resize_out, show_results=show_results, **step_params)
+                                 resize_out=resize_out, show_results=show_results, objective=objective_guide, **step_params)
             
         # apply mask if required
         if mask:
