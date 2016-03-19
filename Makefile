@@ -5,4 +5,4 @@ run:
 
 clean:
 	@rm -f *.pyc tmp.prototxt
-	@rm -rf frames
+	@rm -rf emotions/data/frames/*.jpg

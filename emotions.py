@@ -32,8 +32,6 @@ emotions = Dreamer(
     end_level='pool5'
 )
 
-mkdir_p('frames/')
-
 
 louise_img = np.float32(PIL.Image.open('images/louise.jpg'))
 louise_crop_mask = PIL.Image.open('images/louise_crop_mask.png')
@@ -46,4 +44,4 @@ now = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S.%f")
 dream = emotions.long_dream(louise_img, stages=emotion_stages,
                             resize_in=(224, 224), resize_out=(800, 800),
                             mask=louise_crop_mask,
-                            save_as='frames/emotions-%s'%now, show_results=False)
+                            save_as='emotions/data/frames/%s'%now, show_results=False)
