@@ -38,11 +38,11 @@ louise_crop_mask = PIL.Image.open('images/louise_crop_mask.png')
 
 
 # Define dream pipeline
-emotion_stages=['conv5', 'conv3', 'conv4']
+emotion_stages=['conv5', 'conv2', 'conv3', 'conv4']
 now = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S.%f")
     
 while True:
     emotions.long_dream(louise_img, stages=emotion_stages,
                         resize_in=(224, 224), resize_out=(800, 800),
                         mask=louise_crop_mask,
-                        save_as='emotions/data/frames/%s'%now, show_results=False)
+                        save_as='situations/data/frames/%s'%now, show_results=False)

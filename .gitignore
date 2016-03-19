@@ -69,3 +69,4 @@ tmp.prototxt
 
 # Generated frames
 emotions/data/frames/*.jpg
+situations/data/frames/*.jpg
