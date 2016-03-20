@@ -4,10 +4,15 @@ import java.util.List;
 
 PImage img;
 PImage background;
+PImage footer;
 File framesDir;
 File [] frames;
 File currentFrame;
 File lastFrame;
+
+int targetWidth = 1024;
+int targetHeight = 768;
+int rightShift = 0;
 
 void setup() {
   //fullScreen();
@@ -16,9 +21,12 @@ void setup() {
   surface.setResizable(true);
   background(0);
   
+  rightShift = width - targetWidth;
+  
   framesDir = new File(dataPath("frames"));
   background = loadImage("background.jpg");
-  image(background, 0, 0);
+  image(background, rightShift, 0);
+  footer = background.get(0, targetHeight - 30, targetWidth, targetHeight);
 }
 
 void draw() {
@@ -37,13 +45,13 @@ void draw() {
     String frameName = nameParts[nameParts.length - 1];
     
     img = loadImage(framePath);
-    image(img, width / 2 - 350, 0);
+    image(img, rightShift + targetWidth / 2 - 350, 0);
     
     fill(0, 0, 0);
-    rect(0, height - 30, width, height);
+    image(footer, rightShift, targetHeight - 30);
     fill(128, 128, 128);
     noStroke();
-    text(frameName, 10, height - 10);
+    text(frameName, rightShift + 10, targetHeight - 10);
     
     println(frameName);
   }

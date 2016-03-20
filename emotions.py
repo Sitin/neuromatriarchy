@@ -3,7 +3,7 @@
 # imports and basic setup
 import os
 from glob import glob
-import datetime
+import time
 
 from google.protobuf import text_format
 
@@ -16,7 +16,6 @@ import caffe
 
 from np_array_utils import *
 from dream_utils import *
-from obsession_utils import *
 from img_utils import *
 from file_utils import *
 from settings import *
@@ -36,8 +35,11 @@ emotions = Dreamer(
 emotion_stages = ['conv5', 'conv3', 'conv4']
     
 while True:
-    now = datetime.datetime.now().strftime(TIME_FORMAT)
-    emotions.long_dream(image, stages=emotion_stages,
-                        resize_in=resize_in, resize_out=resize_out,
-                        mask=image_mask,
-                        save_as='emotions/data/frames/%s'%now, show_results=False)
+    if len(glob('emotions/data/frames/control*.jpg')) < 20:
+        emotions.long_dream(image, stages=emotion_stages,
+                            resize_in=resize_in, resize_out=resize_out,
+                            mask=image_mask,
+                            save_as='emotions/data/frames/control', show_results=False)
+    else:
+        print('Too much files generated: idle.')
+        time.sleep(1)

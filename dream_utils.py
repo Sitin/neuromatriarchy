@@ -13,7 +13,6 @@ import caffe
 
 from np_array_utils import *
 from img_utils import *
-from obsession_utils import *
 
 
 # a couple of utility functions for converting to and from Caffe's input image layout
@@ -27,6 +26,30 @@ def deprocess(net, img):
 
 def objective_L2(dst):
     dst.diff[:] = dst.data
+
+
+def define_obsession(net, end, guide):
+    h, w = guide.shape[:2]
+    src, dst = net.blobs['data'], net.blobs[end]
+    src.reshape(1,3,h,w)
+    src.data[0] = preprocess(net, guide)
+    net.forward(end=end)
+    guide_features = dst.data[0].copy()
+    
+    return dst, guide_features
+
+
+def make_objective_guide(guide_features): 
+    def objective_guide(dst):
+        x = dst.data[0].copy()
+        y = guide_features
+        ch = x.shape[0]
+        x = x.reshape(ch,-1)
+        y = y.reshape(ch,-1)
+        A = x.T.dot(y) # compute the matrix of dot-products with guide features
+        dst.diff[0].reshape(ch,-1)[:] = y[:,A.argmax(1)] # select ones that match best
+
+    return objective_guide
 
 
 def make_step(net, step_size=1.5, end=None,
@@ -162,7 +185,7 @@ class Dreamer:
             stage = stages[s]
             # append stage name
             if save_as is not None:
-                save_as += '-%02d-%s' % (s+1, stage)
+                save_as += '-%02d-%s' % (s+1, stage.replace('/', '-'))
             # define name for iteration
             save_stage_as = save_as
             # skip stage saving if required
@@ -175,7 +198,7 @@ class Dreamer:
 
             # inject obsession guide to dream
             objective_guide = objective_L2
-            if len(guides) < s:
+            if len(guides) > s:
                 dst, guide_features = define_obsession(self.net, end=stage, guide=guides[s])
                 objective_guide = make_objective_guide(guide_features)
             
