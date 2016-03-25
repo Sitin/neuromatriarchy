@@ -15,7 +15,7 @@ int targetHeight = 768;
 int rightShift = 0;
 
 void setup() {
-  //fullScreen();
+  //fullScreen(P2D, 1);
   frameRate(12);
   size(1024, 768);  // size always goes first!
   surface.setResizable(true);

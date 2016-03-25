@@ -70,3 +70,10 @@ tmp.prototxt
 # Generated frames
 emotions/data/frames/*.jpg
 situations/data/frames/*.jpg
+
+# Caffe models
+models/VGG_S_rgb/*.caffemodel
+models/VGG_S_rgb/*.binaryproto
+
+# Temporary files
+*.bak

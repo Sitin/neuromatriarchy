@@ -1,0 +1,16 @@
+net: "models/VGG_S_rgb/train_val.prototxt"
+test_iter: 1000
+test_interval: 4000
+test_initialization: false
+display: 40
+average_loss: 40
+base_lr: 0.01
+lr_policy: "step"
+stepsize: 320
+gamma: 0.96
+max_iter: 10000
+momentum: 0.9
+weight_decay: 0.0002
+snapshot: 40
+snapshot_prefix: "models/VGG_S_rgb/Ria_Gurtow"
+solver_mode: GPU
