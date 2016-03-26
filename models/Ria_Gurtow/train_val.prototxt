@@ -1,21 +1,19 @@
-name: "CaffeNet"
+name: "RiaGurtow"
 layers {
   name: "data"
   type: IMAGE_DATA
   top: "data"
   top: "label"
   image_data_param {
-    # source: "data/oxford102/test.txt"
     source: "data/Ria_Gurtow/train.txt"
     batch_size: 50
-    new_height: 224
-    new_width: 224
+    new_height: 256
+    new_width: 256
   }
   transform_param {
-    crop_size: 227
-    # mean_file: "data/mean.binaryproto"
-    # mean_file: "data/Ria_Gurtow/mean.binaryproto"
-    mean_file: "data/ilsvrc12/imagenet_mean.binaryproto"
+    crop_size: 224
+    # mean_file: "/Users/sitin/Documents/Workspace/caffe/data/ilsvrc12/imagenet_mean.binaryproto"
+    mean_file: "/Users/sitin/Documents/Jupyter/neuromatriarchy/models/VGG_S_rgb/mean.binaryproto"
     mirror: true
   }
   include: { phase: TRAIN }
@@ -26,16 +24,15 @@ layers {
   top: "data"
   top: "label"
   image_data_param {
-    # source: "data/oxford102/train.txt"
-    source: "data/Ria_Gurtow/train.txt"
+    source: "data/Ria_Gurtow/test.txt"
     batch_size: 50
-    new_height: 224
-    new_width: 224
+    new_height: 256
+    new_width: 256
   }
   transform_param {
-    crop_size: 227
-    mean_file: "data/ilsvrc12/imagenet_mean.binaryproto"
-    # mean_file: "data/Ria_Gurtow/mean.binaryproto"
+    crop_size: 224
+    # mean_file: "/Users/sitin/Documents/Workspace/caffe/data/ilsvrc12/imagenet_mean.binaryproto"
+    mean_file: "/Users/sitin/Documents/Jupyter/neuromatriarchy/models/VGG_S_rgb/mean.binaryproto"
     mirror: false
   }
   include: { phase: TEST }

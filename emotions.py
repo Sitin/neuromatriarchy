@@ -19,6 +19,7 @@ from dream_utils import *
 from img_utils import *
 from file_utils import *
 from settings import *
+from settings.emotions_model import *
 
 
 # Define dream pipeline

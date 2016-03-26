@@ -67,6 +67,12 @@ target/
 # Caffe temporary stuff
 tmp.prototxt
 
+# Dataset generated data
+data/Ria_Gurtow/jpg/
+data/Ria_Gurtow/raw_data/
+data/Ria_Gurtow/train.txt
+data/Ria_Gurtow/test.txt
+
 # Generated frames
 emotions/data/frames/*.jpg
 situations/data/frames/*.jpg
@@ -74,6 +80,7 @@ situations/data/frames/*.jpg
 # Caffe models
 models/VGG_S_rgb/*.caffemodel
 models/VGG_S_rgb/*.binaryproto
+data/Ria_Gurtow/*.binaryproto
 
 # Temporary files
 *.bak
