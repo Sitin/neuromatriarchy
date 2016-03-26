@@ -1,9 +1,11 @@
-all: run
+.PHONY: all test clean situations emotions
 
-run:
-	dreamer.py
+all: train
 
 clean: clean-binary clean-dataset clean-emotions clean-situations clean-models
+
+build:
+	python build_dataset.py
 
 emotions:
 	python emotions.py
@@ -11,8 +13,8 @@ emotions:
 situations:
 	python situations.py
 
-train:
-	./train.sh
+train: build
+	./train.sh fast
 
 ###############################################################################
 # Detailed cleanup
