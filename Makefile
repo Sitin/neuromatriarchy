@@ -4,37 +4,45 @@ all: train
 
 clean: clean-binary clean-dataset clean-emotions clean-situations clean-models
 
-build:
-	python build_dataset.py
+dataset:
+	@echo "Creating dataset for Ria Gurtow"
+	@python build_dataset.py
 
 emotions:
-	python emotions.py
+	@echo "Rendering Ria Gurtow emotions"
+	@python emotions.py
 
 situations:
-	python situations.py
+	@echo "Rendering Ria Gurtow situations"
+	@python situations.py
 
-train: build
-	./train.sh fast
+train: dataset
+	@echo "Training Ria Gurtow situations model"
+	@./train.sh fast
 
 ###############################################################################
 # Detailed cleanup
 ###############################################################################
 
 clean-binary:
+	@echo "Cleaning binaty temporary files"
 	@find . -name "*.pyc tmp.prototxt" -delete
 	@find . -name "tmp.prototxt" -delete
 
 clean-dataset:
+	@echo "Cleaning dataset"
 	@find data/Ria_Gurtow/jpg/ -maxdepth 1 -name "*.jpg" -delete
-	@rm -rf data/Ria_Gurtow/jpg
 	@rm -f data/Ria_Gurtow/train.txt data/Ria_Gurtow/test.txt
 
 clean-emotions:
+	@echo "Cleaning emotions model frames"
 	@find emotions/data/frames/ -maxdepth 1 -name "*.jpg" -delete
 
 clean-situations:
+	@echo "Cleaning situations model frames"
 	@find situations/data/frames/ -maxdepth 1 -name "*.jpg" -delete
 
 clean-models:
+	@echo "Cleaning situations model generations"
 	@find models/Ria_Gurtow/generations/ -maxdepth 1 -name "*.caffemodel" -delete
 	@find models/Ria_Gurtow/generations/ -maxdepth 1 -name "*.solverstate" -delete

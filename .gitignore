@@ -68,7 +68,7 @@ target/
 tmp.prototxt
 
 # Dataset generated data
-data/Ria_Gurtow/jpg/
+data/Ria_Gurtow/jpg/*.jpg
 data/Ria_Gurtow/raw_data/
 data/Ria_Gurtow/train.txt
 data/Ria_Gurtow/test.txt

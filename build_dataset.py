@@ -37,7 +37,7 @@ def create_category_raw_data_dir(category):
 
 
 # emotional_categories = ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surprise']
-categories = ['riots', 'police_violence', 'transhuman', 'carnival', 'crowd', 'atistic', 'educaciton']
+categories = ['riots', 'police_violence', 'transhuman', 'carnival', 'crowd', 'filming', 'educaciton']
 extensions = ['jpg', 'png']
 
 # create directories for row data per category

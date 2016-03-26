@@ -102,7 +102,8 @@ def make_dream(dreamer, gen_index, stages, verbose_save=False):
 
 gen_index = 0
 verbose_save = False
-stages = ['conv5', 'conv3']
+resize_in = (700, 700)
+stages = ['conv4', 'conv3', 'conv5']
 
 # render generations once ready    
 while True:
