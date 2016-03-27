@@ -59,11 +59,12 @@ def convert_images():
 
     for category_index in xrange(len(categories)):
         category = categories[category_index]
-        print('Convert images for category "%s"'%category)
 
         raw_images = []
         for extension in extensions:
             raw_images.extend(glob('data/Ria_Gurtow/raw_data/%s/*.%s'%(category, extension)))
+
+        print('Converting {count} images for category "{category}"...'.format(count=len(raw_images), category=category))
 
         for i in xrange(len(raw_images)):
             img = PIL.Image.open(raw_images[i])
@@ -89,6 +90,12 @@ def convert_images():
 
     for entry in test:
         test_list.write('/Users/sitin/Documents/Jupyter/neuromatriarchy/{filename} {index}\n'.format(filename=entry[0], index=entry[1]))
+
+    print('Processed {count} images (train: {train}, test: {test}).'.format(
+        count=len(train) + len(test),
+        train=len(train),
+        test=len(test)
+    ))
 
     train_list.close()
     test_list.close()
