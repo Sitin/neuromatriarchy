@@ -32,7 +32,7 @@ def get_next_generation(curent_index):
     # we are looking for '*.solverstate' instead of '*.caffemodel'
     # since the former appears only if model snapshot is fully written
     pattern = r'_(\d+).solverstate$'
-    model_files = glob('models/Ria_Gurtow/generations/ria_gurtow_iter_[0-9][0-9]*.solverstate')
+    model_files = glob('models/Ria_Gurtow/generations/ria_gurtow_iter_[0-9]*.solverstate')
     model_indices = [int(re.search(pattern, f).groups()[0]) for f in model_files]
 
     # find and return generation index which nore than the current one
@@ -71,12 +71,14 @@ def load_generation(gen_index):
             dreamer = Dreamer(
                 net_fn=model_path + 'deploy.txt',
                 param_fn=model_file,
+                mean='models/Ria_Gurtow/train.binaryproto',
                 end_level='pool5')
             print('Model generation #%03d is loaded'%gen_index)
         except KeyboardInterrupt as ke:
             raise ke
         except Exception as e:
             logging.error(traceback.format_exc())
+            time.sleep(1)
 
     return dreamer
 

@@ -80,11 +80,21 @@ def make_step(net, step_size=1.5, end=None,
 
 
 class Dreamer:
-    def __init__(self, net_fn, param_fn, end_level, channel_swap=(2,1,0)):
+    def __init__(self, net_fn, param_fn, end_level, channel_swap=(2,1,0), mean=np.float32([104.0, 116.0, 122.0])):
         self.net_fn = net_fn
         self.param_fn = param_fn
         self.end_level = end_level
         self.channel_swap = channel_swap
+
+        # read from meanfile if string passed
+        if isinstance(mean, str):
+            meanfile = mean
+            proto_data = open(meanfile, "rb").read()
+            a = caffe.io.caffe_pb2.BlobProto.FromString(proto_data)
+            mean = caffe.io.blobproto_to_array(a)[0].mean(1).mean(1)
+            print('Calculated mean from {meanfile}: {mean}'.format(meanfile=meanfile, mean=mean))
+
+        self.mean = mean
 
         # Patching model to be able to compute gradients.
         # Note that you can also manually add "force_backward: true" line to "deploy.prototxt".
@@ -94,8 +104,8 @@ class Dreamer:
         open('tmp.prototxt', 'w').write(str(self.model))
 
         self.net = caffe.Classifier('tmp.prototxt', self.param_fn,
-                               mean = np.float32([104.0, 116.0, 122.0]), # ImageNet mean, training set dependent
-                               channel_swap = self.channel_swap) # the reference model has channels in BGR order instead of RGB
+                                    mean=self.mean,
+                                    channel_swap=self.channel_swap)
 
     def deepdream(self, base_img, iter_n=10, octave_n=4, octave_scale=1.4, resize_out=None,
                   end=None, clip=True, show_diff=False, save_as=None, mask=None, show_results=True,

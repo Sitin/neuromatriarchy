@@ -3,6 +3,7 @@
 import PIL.Image
 from glob import glob
 import cv2
+import shutil
 
 from file_utils import *
 
@@ -36,54 +37,90 @@ def create_category_raw_data_dir(category):
     mkdir_p(dir_path)
 
 
-# emotional_categories = ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surprise']
-categories = ['riots', 'police_violence', 'transhuman', 'carnival', 'crowd', 'filming', 'educaciton']
-extensions = ['jpg', 'png']
+def convert_images():
+    # emotional_categories = ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surprise']
+    categories = ['riots', 'police_violence', 'transhuman', 'carnival', 'crowd', 'filming', 'educaciton']
+    extensions = ['jpg', 'png']
+    image_side = 256
 
-# create directories for row data per category
-# which may be useful for dataset development
-for category in categories:
-    mkdir_p('data/Ria_Gurtow/raw_data/%s/'%category)
+    # create directories for row data per category
+    # which may be useful for dataset development
+    for category in categories:
+        mkdir_p('data/Ria_Gurtow/raw_data/%s/'%category)
 
-# create directory for images
-mkdir_p('data/Ria_Gurtow/jpg/')
+    # create directory for images
+    mkdir_p('data/Ria_Gurtow/jpg/')
 
-train_list = open('data/Ria_Gurtow/train.txt','w')
-test_list = open('data/Ria_Gurtow/test.txt','w')
+    train_list = open('data/Ria_Gurtow/train.txt','w')
+    test_list = open('data/Ria_Gurtow/test.txt','w')
 
-train = []
-test = []
+    train = []
+    test = []
 
-for category_index in xrange(len(categories)):
-    category = categories[category_index]
-    raw_images = []
-    for extension in extensions:
-        raw_images.extend(glob('data/Ria_Gurtow/raw_data/%s/*.%s'%(category, extension)))
+    for category_index in xrange(len(categories)):
+        category = categories[category_index]
+        print('Convert images for category "%s"'%category)
 
-    for i in xrange(len(raw_images)):
-        img = PIL.Image.open(raw_images[i])
+        raw_images = []
+        for extension in extensions:
+            raw_images.extend(glob('data/Ria_Gurtow/raw_data/%s/*.%s'%(category, extension)))
+
+        for i in xrange(len(raw_images)):
+            img = PIL.Image.open(raw_images[i])
+            
+            # swap chanels
+            b, g, r = img.split()[:3]
+            img = PIL.Image.merge("RGB", (r, g, b))
+            
+            filename = 'data/Ria_Gurtow/jpg/%s-%04d.jpg'%(category, i)
+            
+            resized_and_cropped = crop(set_size(img, image_side), image_side, image_side)
+            resized_and_cropped.save(filename)
+
+            entry = [filename, category_index]
+
+            if i < len(raw_images) * 0.7:
+                train.append(entry)
+            else:
+                test.append(entry)
+
+    for entry in train:
+        train_list.write('/Users/sitin/Documents/Jupyter/neuromatriarchy/{filename} {index}\n'.format(filename=entry[0], index=entry[1]))
+
+    for entry in test:
+        test_list.write('/Users/sitin/Documents/Jupyter/neuromatriarchy/{filename} {index}\n'.format(filename=entry[0], index=entry[1]))
+
+    train_list.close()
+    test_list.close()
+
+
+def make_db_and_mean():
+    # backend = 'leveldb'
+    backend = 'lmdb'
+
+    # convert datasets to database format and compute mean
+    for dataset in ['train', 'test']:
+        db_name = 'data/Ria_Gurtow/{dataset}.{backend}'.format(dataset=dataset, backend=backend)
+        mean_file = 'models/Ria_Gurtow/%s.binaryproto'%dataset
+        files_list = 'data/Ria_Gurtow/%s.txt'%dataset
+
+        shutil.rmtree(db_name, ignore_errors=True)
+        shutil.rmtree(mean_file, ignore_errors=True)
         
-        # swap chanels
-        b, g, r = img.split()[:3]
-        img = PIL.Image.merge("RGB", (r, g, b))
+        flags = '-encode_type jpg -backend %s'%backend
+        bash_command = 'convert_imageset {flags} "" {files_list} {db_name}'.format(
+            flags=flags, files_list=files_list, db_name=db_name)
         
-        filename = 'data/Ria_Gurtow/jpg/%s-%04d.jpg'%(category, i)
-        
-        resized_and_cropped = crop(set_size(img, 224), 224, 224)
-        resized_and_cropped.save(filename)
+        print('Creating {backend} database for {dataset} dataset...'.format(backend=backend, dataset=dataset))
+        os.system(bash_command)
 
-        entry = [filename, category_index]
+        flags = '-backend %s'%backend
+        bash_command = 'compute_image_mean {flags} {db_name} {mean_file}'.format(
+            flags=flags, db_name=db_name, mean_file=mean_file)
 
-        if i < len(raw_images) * 0.7:
-            train.append(entry)
-        else:
-            test.append(entry)
+        print('Computing mean for %s dataset...'%dataset)
+        os.system(bash_command)
 
-for entry in train:
-    train_list.write('/Users/sitin/Documents/Jupyter/neuromatriarchy/{filename} {index}\n'.format(filename=entry[0], index=entry[1]))
 
-for entry in test:
-    test_list.write('/Users/sitin/Documents/Jupyter/neuromatriarchy/{filename} {index}\n'.format(filename=entry[0], index=entry[1]))
-
-train_list.close()
-test_list.close()
+convert_images()
+make_db_and_mean()

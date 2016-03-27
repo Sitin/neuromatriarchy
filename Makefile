@@ -1,6 +1,6 @@
 .PHONY: all test clean situations emotions
 
-all: train
+all: clean dataset train
 
 clean: clean-binary clean-dataset clean-emotions clean-situations clean-models
 
@@ -16,7 +16,7 @@ situations:
 	@echo "Rendering Ria Gurtow situations"
 	@python situations.py
 
-train: dataset
+train:
 	@echo "Training Ria Gurtow situations model"
 	@./train.sh fast
 
@@ -33,6 +33,8 @@ clean-dataset:
 	@echo "Cleaning dataset"
 	@find data/Ria_Gurtow/jpg/ -maxdepth 1 -name "*.jpg" -delete
 	@rm -f data/Ria_Gurtow/train.txt data/Ria_Gurtow/test.txt
+	@rm -rf data/Ria_Gurtow/*.lmdb/ @rm -rf data/Ria_Gurtow/*.leveldb/
+	@rm -rf models/Ria_Gurtow/*.binaryproto
 
 clean-emotions:
 	@echo "Cleaning emotions model frames"

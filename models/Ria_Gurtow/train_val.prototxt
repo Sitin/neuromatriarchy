@@ -1,38 +1,58 @@
 name: "RiaGurtow"
 layers {
   name: "data"
-  type: IMAGE_DATA
   top: "data"
   top: "label"
-  image_data_param {
-    source: "data/Ria_Gurtow/train.txt"
-    batch_size: 50
-    new_height: 256
-    new_width: 256
+  ############################################
+  # For image data source 
+  # type: IMAGE_DATA
+  # image_data_param {
+  #   source: "data/Ria_Gurtow/train.txt"
+  #   batch_size: 64
+  #   new_height: 256
+  #   new_width: 256
+  # }
+  ############################################
+  # For LMDB/LEVELDB
+  type: DATA
+  data_param {
+    source: "data/Ria_Gurtow/train.lmdb"
+    batch_size: 64
+    backend: LMDB
   }
+  ############################################
   transform_param {
     crop_size: 224
-    # mean_file: "/Users/sitin/Documents/Workspace/caffe/data/ilsvrc12/imagenet_mean.binaryproto"
-    mean_file: "/Users/sitin/Documents/Jupyter/neuromatriarchy/models/VGG_S_rgb/mean.binaryproto"
+    mean_file: "models/Ria_Gurtow/train.binaryproto"
     mirror: true
   }
   include: { phase: TRAIN }
 }
 layers {
   name: "data"
-  type: IMAGE_DATA
   top: "data"
   top: "label"
-  image_data_param {
-    source: "data/Ria_Gurtow/test.txt"
-    batch_size: 50
-    new_height: 256
-    new_width: 256
+  ############################################
+  # For image data source 
+  # type: IMAGE_DATA
+  # image_data_param {
+  #   source: "data/Ria_Gurtow/test.txt"
+  #   batch_size: 64
+  #   new_height: 256
+  #   new_width: 256
+  # }
+  ############################################
+  # For LMDB/LEVELDB
+  type: DATA
+  data_param {
+    source: "data/Ria_Gurtow/test.lmdb"
+    batch_size: 64
+    backend: LMDB
   }
+  ############################################
   transform_param {
     crop_size: 224
-    # mean_file: "/Users/sitin/Documents/Workspace/caffe/data/ilsvrc12/imagenet_mean.binaryproto"
-    mean_file: "/Users/sitin/Documents/Jupyter/neuromatriarchy/models/VGG_S_rgb/mean.binaryproto"
+    mean_file: "models/Ria_Gurtow/test.binaryproto"
     mirror: false
   }
   include: { phase: TEST }
