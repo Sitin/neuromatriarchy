@@ -4,10 +4,10 @@ test_interval: 400
 test_initialization: false
 display: 10
 average_loss: 10
-base_lr: 0.1
+base_lr: 0.01
 lr_policy: "step"
 stepsize: 200
-gamma: 0.6
+gamma: 0.76
 max_iter: 1600
 momentum: 0.9
 weight_decay: 0.0005
