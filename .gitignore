@@ -74,14 +74,20 @@ data/Ria_Gurtow/train.txt
 data/Ria_Gurtow/test.txt
 data/Ria_Gurtow/*.lmdb/
 
-# Generated frames
+# Generated media
 emotions/data/frames/*.jpg
 situations/data/frames/*.jpg
+situations/data/*.gif
+situations/data/*.mp4
 
 # Caffe models
 models/VGG_S_rgb/*.caffemodel
 models/VGG_S_rgb/*.binaryproto
 models/Ria_Gurtow/*.binaryproto
+models/Ria_Gurtow/generations/*.caffemodel
+models/Ria_Gurtow/generations/*.solverstate
+models/Ria_Gurtow/solver.prototxt
+models/Ria_Gurtow/*solver.prototxt
 
 # Temporary files
 *.bak

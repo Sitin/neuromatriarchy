@@ -1,0 +1,16 @@
+net: "models/Ria_Gurtow/train_val.prototxt"
+test_iter: 10
+test_interval: {{ test_interval }}
+test_initialization: false
+display: {{ snapshot }}
+average_loss: {{ snapshot }}
+base_lr: {{ base_lr }}
+lr_policy: "step"
+stepsize: {{ stepsize }}
+gamma: {{ gamma }}
+max_iter: {{ max_iter }}
+momentum: {{ momentum }}
+weight_decay: {{ weight_decay }}
+snapshot: {{ snapshot }}
+snapshot_prefix: "models/Ria_Gurtow/generations/ria_gurtow"
+solver_mode: {{ solver_mode }}

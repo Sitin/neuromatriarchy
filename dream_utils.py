@@ -52,12 +52,9 @@ def make_objective_guide(guide_features):
     return objective_guide
 
 
-def make_step(net, step_size=1.5, end=None,
+def make_step(net, end, step_size=1.5,
               jitter=32, clip=True, objective=objective_L2):
         '''Basic gradient ascent step.'''
-        # default end layer is a global variable
-        if end is None:
-            end = DREAM_OPTIONS['end_level']
 
         src = net.blobs['data'] # input image is stored in Net's 'data' blob
         dst = net.blobs[end]
@@ -140,10 +137,11 @@ class Dreamer:
             src.reshape(1,3,h,w) # resize the network's input image size
             src.data[0] = octave_base+detail
             for i in xrange(iter_n):
-                make_step(self.net, end=end, clip=clip, **step_params)
+                make_step(self.net, end, clip=clip, **step_params)
                 
                 # visualization
                 vis = deprocess(self.net, src.data[0])
+                shape = vis.shape
                 if not clip: # adjust image contrast if clipping is disabled
                     vis = vis*(255.0/np.percentile(vis, 99.98))
                 # resize for better preview
@@ -165,7 +163,7 @@ class Dreamer:
                     showarray(vis)
                     
                 # print frame statistics and clear output if necessary
-                print(octave, i, end, vis.shape)
+                print(octave, i, end, shape)
                 if show_results:
                     clear_output(wait=True)
                 
@@ -188,7 +186,7 @@ class Dreamer:
         img = base_img
         if resize_in is not None:
             r_w, r_h = resize_in
-            img=resizearray(img, r_w, r_h)
+            img = resizearray(img, r_w, r_h)
 
             
         for s in xrange(len(stages)):
@@ -204,7 +202,7 @@ class Dreamer:
             # resize at last stage if required
             if s == len(stages) -1 and resize_out is not None:
                 r_w, r_h = resize_out
-                img=resizearray(img, r_w, r_h)
+                img = resizearray(img, r_w, r_h)
 
             # inject obsession guide to dream
             objective_guide = objective_L2
