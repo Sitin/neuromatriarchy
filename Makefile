@@ -1,6 +1,6 @@
 .PHONY: all test clean situations emotions
 
-MP4_FRAMERATE:=-framerate 30
+MP4_FRAMERATE:=-framerate 15
 MP4_ENCODING:=-c:v libx264 -vf fps=30 -pix_fmt yuv420p
 
 all: clean dataset train
@@ -9,7 +9,7 @@ clean: clean-binary clean-dataset clean-emotions clean-situations clean-models c
 
 dataset:
 	@echo "Creating dataset for Ria Gurtow"
-	@python build_dataset.py
+	@python build_dataset.py --subdirs
 
 emotions:
 	@echo "Rendering Ria Gurtow emotions"
@@ -25,16 +25,23 @@ situations:
 		--resize_out 700 700 \
 		--dest situations/data/frames \
 		--verbose \
-		--start_from 0 \
-		# --max_gen 10 \
+		--start_from 3200 \
+		# --max_gen 270 \
 
-solvers:
+solvers: clean-solvers
 	@echo "Render Ria Gurtow solvers"
 	@python render_solvers.py
 
 train: solvers
 	@echo "Training Ria Gurtow situations model"
-	@./train.sh fast
+	@./train.py
+
+vizualize:
+	@draw_net.py --rankdir TB models/Ria_Gurtow/deploy.prototxt images/Ria_Gurtow_model.png
+
+###############################################################################
+# Media tools
+###############################################################################
 
 gif:
 	@echo "Create gif for learning progress"
@@ -42,19 +49,31 @@ gif:
 
 mp4:
 	@echo "Create .mp4 movie for learning progress"
-	@ffmpeg $(MP4_FRAMERATE) -pattern_type glob -i 'situations/data/frames/gen-*.jpg' $(MP4_ENCODING) situations/data/progress.mp4
+	@ffmpeg -y $(MP4_FRAMERATE) -pattern_type glob -i 'situations/data/frames/gen-*.jpg' $(MP4_ENCODING) situations/data/progress.mp4
+
+mask:
+	@echo "Create masked versions for progress frames"
+	@python apply_mask.py --files situations/data/frames/'gen-*.jpg' --mask images/athena_louvre_1024px_face_mask.png --dest situations/data/frames/ --img_pos 162 0
+
+mask-gif: mask
+	@echo "Create gif for learning progress with mask"
+	@convert -delay 0.05 -loop 0 situations/data/frames/mask-gen-*.jpg situations/data/mask-progress.gif
+
+mask-mp4: mask
+	@echo "Create .mp4 movie for learning progress with mask"
+	@ffmpeg -y $(MP4_FRAMERATE) -pattern_type glob -i situations/data/frames/'mask-gen-*.jpg' $(MP4_ENCODING) situations/data/mask-progress.mp4
 
 sepia:
 	@echo "Create sepia for learning progress frames"
 	@python convert_to_sepia.py --files situations/data/frames/'gen-*.jpg' --dest situations/data/frames/
 
-sepia-gif:
+sepia-gif: sepia
 	@echo "Create gif for learning progress in sepia"
 	@convert -delay 0.05 -loop 0 situations/data/frames/sepia-gen-*.jpg situations/data/sepia-progress.gif
 
-sepia-mp4:
+sepia-mp4: sepia
 	@echo "Create .mp4 movie for learning progress in sepia"
-	@ffmpeg $(MP4_FRAMERATE) -pattern_type glob -i situations/data/frames/'sepia-gen-*.jpg' $(MP4_ENCODING) situations/data/sepia-progress.mp4
+	@ffmpeg -y $(MP4_FRAMERATE) -pattern_type glob -i situations/data/frames/'sepia-gen-*.jpg' $(MP4_ENCODING) situations/data/sepia-progress.mp4
 
 ###############################################################################
 # Detailed cleanup
@@ -67,14 +86,20 @@ clean-binary:
 
 clean-dataset:
 	@echo "Cleaning dataset"
-	@find data/Ria_Gurtow/jpg/ -maxdepth 1 -name "*.jpg" -delete
-	@rm -f data/Ria_Gurtow/train.txt data/Ria_Gurtow/test.txt
+	@rm -rf data/Ria_Gurtow/situations/
+	@rm -f data/Ria_Gurtow/*.txt
 	@rm -rf data/Ria_Gurtow/*.lmdb/ @rm -rf data/Ria_Gurtow/*.leveldb/
 	@rm -rf models/Ria_Gurtow/*.binaryproto
 
 clean-emotions:
 	@echo "Cleaning emotions model frames"
 	@find emotions/data/frames/ -maxdepth 1 -name "*.jpg" -delete
+
+clean-sepia:
+	@find situations/data/frames/ -maxdepth 1 -name "sepia-*.jpg" -delete
+
+clean-mask:
+	@find situations/data/frames/ -maxdepth 1 -name "mask-*.jpg" -delete
 
 clean-situations:
 	@echo "Cleaning situations model frames"

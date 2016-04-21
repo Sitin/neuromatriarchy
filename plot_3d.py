@@ -3,14 +3,9 @@
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import PIL
 import scipy.misc
 
-
-def load_image_data(filename, scale=1./7):
-    image = np.float32(PIL.Image.open(filename).convert('L'))
-    return scipy.misc.imresize(image, scale, interp='cubic')
+from np_array_utils import load_image
 
 
 def plot_3d(image=None):
@@ -39,5 +34,5 @@ if __name__ == "__main__":
     # parser.add_argument('--output', '-0', type=str, default=None, help='optional output file')
     args = parser.parse_args()
 
-    image = load_image_data(args.input)
+    image = load_image(args.input, 1/7)
     plot_3d(image)

@@ -9,7 +9,6 @@ import os
 def convert(files, tmp_file='/tmp/sepia-converter-gs.jpg'):
     for f in files:
         basename = os.path.basename(f)
-        dirname = os.path.dirname(f)
         new_name = os.path.abspath('{dest}/{prefix}{filename}'.format(
             dest=args.dest,
             prefix=args.prefix,

@@ -2,30 +2,14 @@
 
 # imports and basic setup
 import argparse
-import os
 from glob import glob
-import datetime
 import time
 import re
 import traceback
 import logging
 
-import numpy as np
-import PIL.Image
-from google.protobuf import text_format
-
-import caffe
-
-# If your GPU supports CUDA and Caffe was built with CUDA support,
-# uncomment the following to run Caffe operations on the GPU.
-# caffe.set_mode_gpu()
-# caffe.set_device(0) # select GPU device if multiple devices exist
-
-from np_array_utils import *
 from dream_utils import *
 from img_utils import *
-from file_utils import *
-from settings import *
 
 
 logging.basicConfig()
@@ -35,8 +19,8 @@ logger = logging.getLogger('situations')
 def get_next_generation(curent_index, ext='solverstate'):
     # the reason to look for '*.solverstate' instead of '*.caffemodel'
     # is that the former appears only if model snapshot is fully written
-    pattern = r'_(\d+).%s$'%ext
-    model_files = glob('models/Ria_Gurtow/generations/ria_gurtow_iter_[0-9]*.%s'%ext)
+    pattern = r'_(\d+).%s$' % ext
+    model_files = glob('models/Ria_Gurtow/generations/ria_gurtow_iter_[0-9]*.%s' % ext)
     model_indices = [int(re.search(pattern, f).groups()[0]) for f in model_files]
 
     # find and return generation index which nore than the current one
@@ -48,11 +32,11 @@ def get_next_generation(curent_index, ext='solverstate'):
 def await_next_generation(curent_index):
     next_index = get_next_generation(curent_index)
     while next_index is None:
-        logger.info('Waiting for model generation next to #%s'%curent_index)
+        logger.info('Waiting for model generation next to #%s' % curent_index)
         time.sleep(1)
         next_index = get_next_generation(curent_index)
-    logger.info('Found generation {next_index} next to {curent_index}'
-        .format(curent_index=curent_index, next_index=next_index))
+    logger.info('Found generation {next_index} next to {curent_index}'.format(
+        curent_index=curent_index, next_index=next_index))
     return next_index
 
 
@@ -74,7 +58,7 @@ def load_generation(gen_index):
     while dreamer is None:
         try:
             dreamer = Dreamer(
-                net_fn=model_path + 'deploy.txt',
+                net_fn=model_path + 'deploy.prototxt',
                 param_fn=model_file,
                 mean='models/Ria_Gurtow/train.binaryproto',
                 end_level='pool5')
@@ -144,7 +128,7 @@ def render(image, start_from, dest, stages,
             logger.error(traceback.format_exc())
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description='Renders generations for Ria Gurtow model.')
     parser.add_argument('--stages', nargs='*', action='store', type=str, required=True, help='net layers to use in stages')
     parser.add_argument('--image', type=str, required=True, help='image to process')
@@ -171,11 +155,15 @@ if __name__ == "__main__":
     if args.mask is not None:
         image_mask = PIL.Image.open(args.mask)
     if args.resize_in is not None:
-        resize_in=tuple(args.resize_in)
+        resize_in = tuple(args.resize_in)
     if args.resize_out is not None:
-        resize_out=tuple(args.resize_out)
+        resize_out = tuple(args.resize_out)
 
     render(image=image, start_from=args.start_from, dest=args.dest, stages=args.stages,
            max_generation=args.max_gen,
            resize_in=resize_in, resize_out=resize_out, image_mask=image_mask,
            verbose_save=args.save_all)
+
+
+if __name__ == "__main__":
+    main()

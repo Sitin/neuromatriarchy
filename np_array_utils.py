@@ -1,7 +1,15 @@
 from cStringIO import StringIO
 import numpy as np
 import PIL.Image
-from IPython.display import clear_output, Image, display
+import scipy
+from IPython.display import Image, display
+
+
+def load_image(filename, scale=None):
+    image = np.float32(PIL.Image.open(filename).convert('L'))
+    if scale is not None:
+        image = scipy.misc.imresize(image, scale, interp='cubic')
+    return image
 
 
 def showarray(a, fmt='jpeg'):

@@ -1,18 +1,15 @@
-import os
-
-import numpy as np
 import scipy.ndimage as nd
 from google.protobuf import text_format
+from IPython.display import clear_output, Image, display
 
 import caffe
+
+from img_utils import *
 
 # If your GPU supports CUDA and Caffe was built with CUDA support,
 # uncomment the following to run Caffe operations on the GPU.
 # caffe.set_mode_gpu()
-# caffe.set_device(0) # select GPU device if multiple devices exist
-
-from np_array_utils import *
-from img_utils import *
+# caffe.set_device(0)  # select GPU device if multiple devices exist
 
 
 # a couple of utility functions for converting to and from Caffe's input image layout

@@ -68,10 +68,9 @@ target/
 tmp.prototxt
 
 # Dataset generated data
-data/Ria_Gurtow/jpg/*.jpg
+data/Ria_Gurtow/situations/
 data/Ria_Gurtow/raw_data/
-data/Ria_Gurtow/train.txt
-data/Ria_Gurtow/test.txt
+data/Ria_Gurtow/*.txt
 data/Ria_Gurtow/*.lmdb/
 
 # Generated media
@@ -89,5 +88,9 @@ models/Ria_Gurtow/generations/*.solverstate
 models/Ria_Gurtow/solver.prototxt
 models/Ria_Gurtow/*solver.prototxt
 
+# Model vizualizations
+images/Ria_Gurtow_model.png
+
 # Temporary files
 *.bak
+images/base

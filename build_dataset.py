@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
+import argparse
 import PIL.Image
 from glob import glob
-import cv2
 import shutil
 
 from file_utils import *
@@ -32,48 +32,51 @@ def set_size(img, size, filter=PIL.Image.ANTIALIAS):
     return img.resize((width, height), filter)
 
 
-def create_category_raw_data_dir(category):
-    dir_path = 'data/Ria_Gurtow/raw_data/%s/'%category
-    mkdir_p(dir_path)
-
-
-def convert_images():
+def convert_images(use_subdirectories=False, verbose=False):
     # emotional_categories = ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surprise']
     categories = ['riots', 'police_violence', 'transhuman', 'carnival', 'crowd', 'filming', 'educaciton']
-    extensions = ['jpg', 'png']
+    extensions = ['jpg', 'png', 'jpeg']
     image_side = 256
 
-    # create directories for row data per category
+    # create directories for each category
     # which may be useful for dataset development
     for category in categories:
-        mkdir_p('data/Ria_Gurtow/raw_data/%s/'%category)
+        mkdir_p('data/Ria_Gurtow/raw_data/%s/' % category)
 
-    # create directory for images
-    mkdir_p('data/Ria_Gurtow/jpg/')
-
-    train_list = open('data/Ria_Gurtow/train.txt','w')
-    test_list = open('data/Ria_Gurtow/test.txt','w')
+    train_list = open('data/Ria_Gurtow/train.txt', 'w')
+    test_list = open('data/Ria_Gurtow/test.txt', 'w')
 
     train = []
     test = []
 
     for category_index in xrange(len(categories)):
         category = categories[category_index]
+        mkdir_p('data/Ria_Gurtow/situations/%s/' % category)
+        directories = [d[0] for d in os.walk('data/Ria_Gurtow/raw_data/%s/' % category)]
+
+        if not use_subdirectories:
+            directories = directories[:1]
 
         raw_images = []
-        for extension in extensions:
-            raw_images.extend(glob('data/Ria_Gurtow/raw_data/%s/*.%s'%(category, extension)))
+        for directory in directories:
+            for extension in extensions:
+                raw_images.extend(glob('{directory}/*.{ext}'.format(
+                    directory=directory, ext=extension)))
 
         print('Converting {count} images for category "{category}"...'.format(count=len(raw_images), category=category))
 
         for i in xrange(len(raw_images)):
+            if verbose:
+                print('Converting %s...' % raw_images[i])
+
             img = PIL.Image.open(raw_images[i])
             
-            # swap chanels
+            # swap channels
             b, g, r = img.split()[:3]
             img = PIL.Image.merge("RGB", (r, g, b))
             
-            filename = 'data/Ria_Gurtow/jpg/%s-%04d.jpg'%(category, i)
+            filename = 'data/Ria_Gurtow/situations/{category}/{category}_{i}.jpg'.format(
+                category=category, i='%04d' % i)
             
             resized_and_cropped = crop(set_size(img, image_side), image_side, image_side)
             resized_and_cropped.save(filename)
@@ -86,10 +89,12 @@ def convert_images():
                 test.append(entry)
 
     for entry in train:
-        train_list.write('/Users/sitin/Documents/Jupyter/neuromatriarchy/{filename} {index}\n'.format(filename=entry[0], index=entry[1]))
+        train_list.write('/Users/sitin/Documents/Jupyter/neuromatriarchy/{filename} {index}\n'.format(
+            filename=entry[0], index=entry[1]))
 
     for entry in test:
-        test_list.write('/Users/sitin/Documents/Jupyter/neuromatriarchy/{filename} {index}\n'.format(filename=entry[0], index=entry[1]))
+        test_list.write('/Users/sitin/Documents/Jupyter/neuromatriarchy/{filename} {index}\n'.format(
+            filename=entry[0], index=entry[1]))
 
     print('Processed {count} images (train: {train}, test: {test}).'.format(
         count=len(train) + len(test),
@@ -129,5 +134,15 @@ def make_db_and_mean():
         os.system(bash_command)
 
 
-convert_images()
-make_db_and_mean()
+def main():
+    parser = argparse.ArgumentParser(description='Builds dataset.')
+    parser.add_argument('--subdirs', action='store_true', help='use subdirectories for categories')
+    parser.add_argument('--verbose', action='store_true', help='verbose output')
+    args = parser.parse_args()
+    
+    convert_images(use_subdirectories=args.subdirs, verbose=args.verbose)
+    make_db_and_mean()
+
+
+if __name__ == "__main__":
+    main()

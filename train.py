@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import argparse
 import os
+import sys
 
+from clean import delete_generations
 from settings import *
 
 
@@ -19,23 +23,32 @@ def train(solvers,
         solvers_range = sorted(list(solvers_range))
     for i in solvers_range:
         options = solvers[i]
-        solver = solvers_dir + '%s_solver.prototxt'%options['name']
+        solver = solvers_dir + '%s_solver.prototxt' % options['name']
         if i == 0:
             # first model fine tuned from pretrained model
-            command = 'caffe train -solver {solver} -weights {pretrained}'.format(
+            command = 'caffe train -solver {solver} -weights {pretrained} -sigint_effect stop'.format(
                 solver=solver, pretrained=pretrained)
+            base_iteration = 0
         else:
             # next models should be trained from snapshots
-            snapshot = gen_prefix + '%s.solverstate'%solvers[i-1]['max_iter']
-            command = 'caffe train --solver={solver} --snapshot={snapshot}'.format(
+            base_iteration = solvers[i-1]['max_iter']
+            snapshot = gen_prefix + '%s.solverstate' % base_iteration
+            command = 'caffe train --solver={solver} --snapshot={snapshot} -sigint_effect stop'.format(
                 solver=solver, snapshot=snapshot)
         if test:
             print(command)
+            # check first epoch precondotions
+            if i == solvers_range[0]:
+                if not os.path.isfile(solver):
+                    print('ERROR: missing solver "%s"' % solver, file=sys.stderr)
+                if i > 0 and not os.path.isfile(snapshot):
+                    print('Missing snapshot "%s"' % snapshot, file=sys.stderr)
         else:
             os.system(command)
+            delete_generations((base_iteration + 1, solvers[i]['max_iter'] - 1), ext='solverstate')
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description='Train Ria Gurtow situations model.')
     parser.add_argument('--range', nargs='+', action='store', type=int, help='range for solvers as "FIRST [LAST]"')
     parser.add_argument('--test', action='store_true', help='no action, only show commands')
@@ -54,7 +67,10 @@ if __name__ == "__main__":
         solvers_range = xrange(args.range[0], args.range[1])
 
     if args.test and solvers_range is not None:
-        print('Use solvers in range %s'%solvers_range)
+        print('Use solvers in range %s' % solvers_range)
 
     train(solvers, solvers_range=solvers_range, test=args.test)
-    
+
+
+if __name__ == "__main__":
+    main()

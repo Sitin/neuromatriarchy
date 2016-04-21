@@ -1,26 +1,15 @@
 #!/usr/bin/env python
 
 # imports and basic setup
-import os
 from glob import glob
 import datetime
 import time
-
-import numpy as np
-import PIL.Image
-from google.protobuf import text_format
-
-import caffe
 
 # If your GPU supports CUDA and Caffe was built with CUDA support,
 # uncomment the following to run Caffe operations on the GPU.
 # caffe.set_mode_gpu()
 # caffe.set_device(0) # select GPU device if multiple devices exist
 
-from np_array_utils import *
-from dream_utils import *
-from img_utils import *
-from file_utils import *
 from settings import *
 from settings.extra_models import *
 
