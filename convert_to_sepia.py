@@ -6,31 +6,32 @@ import itertools
 import os
 
 
-def convert(files, tmp_file='/tmp/sepia-converter-gs.jpg'):
+def convert(files, dest, tmp_file='/tmp/sepia-converter-gs.jpg',
+            prefix='sepia-', color='wheat', grayscale='rec709luma', verbose=False):
     for f in files:
         basename = os.path.basename(f)
         new_name = os.path.abspath('{dest}/{prefix}{filename}'.format(
-            dest=args.dest,
-            prefix=args.prefix,
+            dest=dest,
+            prefix=prefix,
             filename=basename))
 
         os.system('convert {src_name} -grayscale {grayscale} {tmp_file}'.format(
             src_name=f,
-            grayscale=args.grayscale,
+            grayscale=grayscale,
             tmp_file=tmp_file))
         os.system('convert {tmp_file} -fill {color} -tint 100 {dest}'.format(
             tmp_file=tmp_file,
-            color=args.color,
+            color=color,
             dest=new_name))
 
-        if args.verbose:
+        if verbose:
             print('Convert "{src}" to "{dst}"'.format(src=f, dst=new_name))
 
-    if args.verbose:
+    if verbose:
             print('%s files converted.'%len(files))
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description='Convert images to sepia.')
     parser.add_argument('--files', nargs='*', action='store', type=str, required=True, help='files to convert')
     parser.add_argument('--dest', type=str, required=True, help='destination directory for converted images')
@@ -42,4 +43,8 @@ if __name__ == "__main__":
 
     files = sorted(list(itertools.chain(*[glob(f) for f in args.files])))
 
-    convert(files)
+    convert(files, args.dest, color=args.color, grayscale=args.grayscale, prefix=args.prefix, verbose=args.verbose)
+
+
+if __name__ == "__main__":
+    main()

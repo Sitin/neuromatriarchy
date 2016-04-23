@@ -3,6 +3,9 @@
 MP4_FRAMERATE:=-framerate 15
 MP4_ENCODING:=-c:v libx264 -vf fps=30 -pix_fmt yuv420p
 
+MP4_SLOW_FRAMERATE:=-framerate 5
+MP4_SLOW_ENCODING:=-c:v libx264 -vf fps=5 -pix_fmt yuv420p
+
 all: clean dataset train
 
 clean: clean-binary clean-dataset clean-emotions clean-situations clean-models clean-solvers
@@ -15,8 +18,39 @@ emotions:
 	@echo "Rendering Ria Gurtow emotions"
 	@python emotions.py
 
-situations:
-	@echo "Rendering Ria Gurtow situations"
+render-lisa:
+	@echo "Rendering Ria Gurtow situations for Lisa Gotfrik"
+	@python situations.py \
+		--image images/base/lisa-08.jpg \
+		--mask images/base/lisa-black-mask.png \
+		--stages conv4 conv3 conv5 \
+		--resize_in 0 256 \
+		--resize_out 0 1080 \
+		--dest frames/lisa \
+		--verbose \
+		--start_from 0 \
+		--save_all \
+		--num_rendered 5 \
+		--max_gen 3500 \
+		# --test \
+
+render-unknown:
+	@echo "Rendering Ria Gurtow situations for Jane Dow"
+	@python situations.py \
+		--image images/base/unknown-06.jpg \
+		--mask images/base/unknown-black-mask.png \
+		--stages conv4 conv3 conv5 \
+		--resize_in 0 256 \
+		--resize_out 0 1080 \
+		--dest frames/unknown \
+		--verbose \
+		--start_from 0 \
+		--save_all \
+		--num_rendered 5\
+		--max_gen 0 \
+
+render-athena:
+	@echo "Rendering Ria Gurtow situations for Athena"
 	@python situations.py \
 		--image images/athena_louvre_700px.jpg \
 		--mask images/athena_louvre_700px_face_mask.png \
@@ -25,8 +59,8 @@ situations:
 		--resize_out 700 700 \
 		--dest situations/data/frames \
 		--verbose \
-		--start_from 3200 \
-		# --max_gen 270 \
+		--start_from 0 \
+		# --max_gen 3500 \
 
 solvers: clean-solvers
 	@echo "Render Ria Gurtow solvers"
@@ -49,7 +83,15 @@ gif:
 
 mp4:
 	@echo "Create .mp4 movie for learning progress"
-	@ffmpeg -y $(MP4_FRAMERATE) -pattern_type glob -i 'situations/data/frames/gen-*.jpg' $(MP4_ENCODING) situations/data/progress.mp4
+	@ffmpeg -y $(MP4_FRAMERATE) -pattern_type glob -i 'situations/data/frames/gen-*.jpg' $(MP4_SLOW_ENCODING) situations/data/progress.mp4
+
+mp4-lisa:
+	@echo "Create .mp4 movie for learning progress and Lisa Gotfrik"
+	@ffmpeg -y $(MP4_SLOW_FRAMERATE) -pattern_type glob -i 'frames/lisa/verbose-gen-*.jpg' $(MP4_SLOW_ENCODING) frames/lisa.mp4
+
+mp4-unknown:
+	@echo "Create .mp4 movie for learning progress and Jane Dow"
+	@ffmpeg -y $(MP4_SLOW_FRAMERATE) -pattern_type glob -i 'frames/unknown/verbose-gen-*.jpg' $(MP4_ENCODING) frames/unknown.mp4
 
 mask:
 	@echo "Create masked versions for progress frames"

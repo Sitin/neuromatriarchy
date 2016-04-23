@@ -78,6 +78,7 @@ emotions/data/frames/*.jpg
 situations/data/frames/*.jpg
 situations/data/*.gif
 situations/data/*.mp4
+images/renders
 
 # Caffe models
 models/VGG_S_rgb/*.caffemodel
@@ -93,4 +94,3 @@ images/Ria_Gurtow_model.png
 
 # Temporary files
 *.bak
-images/base

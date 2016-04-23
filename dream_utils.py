@@ -172,19 +172,23 @@ class Dreamer:
         # returning the resulting image
         return deprocess(self.net, src.data[0])
 
-
     def long_dream(self, base_img, stages=[],
                    resize_in=None, resize_out=None,
                    show_diff=False, save_as=None, mask=None,
-                   show_results=True, skip_stages=0, guides=[], **step_params):
+                   show_results=True, skip_stages=0, guides=[], num_rendered=0, **step_params):
+        if resize_out is not None:
+            base_img = resizearray(base_img, resize_out[0], resize_out[1])
+
         if save_as is not None:
-            fromarray(base_img).save('%s-00-base.jpg'%save_as)
+            if mask is not None:
+                fromarray(apply_mask_to_img(base_img, mask)).save('%s-00-base.jpg' % save_as)
+            else:
+                fromarray(base_img).save('%s-00-base.jpg' % save_as)
         
         img = base_img
         if resize_in is not None:
             r_w, r_h = resize_in
             img = resizearray(img, r_w, r_h)
-
             
         for s in xrange(len(stages)):
             stage = stages[s]
@@ -213,5 +217,11 @@ class Dreamer:
         # apply mask if required
         if mask:
             img = apply_mask_to_img(img, mask)
+
+        if save_as is not None and num_rendered > 0:
+            print('save %s extra final images' % num_rendered)
+            save_as += '-%02d-%s' % (len(stages) + 1, 'final')
+            for i in xrange(num_rendered):
+                fromarray(img).save(save_as + '-%04d.jpg' % i)
 
         return img
